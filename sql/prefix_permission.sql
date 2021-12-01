@@ -1,12 +1,13 @@
 -- ----------------------------
 --  Table structure for `{{%permission_api}}`
 -- ----------------------------
-CREATE TABLE `{{%permission_api}}` (
+CREATE TABLE `portal_permission_api` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增ID',
   `code` varchar(50) NOT NULL COMMENT '路径标识',
   `path` varchar(200) NOT NULL DEFAULT '' COMMENT 'API路径',
   `remark` varchar(200) NOT NULL DEFAULT '' COMMENT '路径描述',
   `exts` json DEFAULT NULL COMMENT '扩展信息',
+  `sort_order` tinyint(4) unsigned NOT NULL DEFAULT '0' COMMENT '显示排序',
 
   `is_public` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '是否公共路径，公共路径不需要权限',
   `is_enable` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT '是否启用',
@@ -24,14 +25,16 @@ CREATE TABLE `{{%permission_api}}` (
 -- ----------------------------
 --  Table structure for `{{%permission_menu}}`
 -- ----------------------------
-CREATE TABLE `{{%permission_menu}}` (
+CREATE TABLE `portal_permission_menu` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增ID',
   `type` varchar(20) NOT NULL COMMENT '类型[menu:菜单,footer:底部菜单,top:顶端菜单,button:按钮]',
   `path` varchar(200) NOT NULL DEFAULT '' COMMENT '菜单路径',
   `parent_code` varchar(50) NOT NULL DEFAULT '' COMMENT '上级标识',
   `code` varchar(50) NOT NULL COMMENT '菜单标识',
+  `name` varchar(50) NOT NULL COMMENT '菜单名称',
   `remark` varchar(200) NOT NULL DEFAULT '' COMMENT '路径描述',
   `exts` json DEFAULT NULL COMMENT '扩展信息',
+  `sort_order` tinyint(4) unsigned NOT NULL DEFAULT '0' COMMENT '显示排序',
 
   `is_public` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '是否公共路径，公共路径不需要权限',
   `is_enable` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT '是否启用',
@@ -43,6 +46,7 @@ CREATE TABLE `{{%permission_menu}}` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_type_path` (`type`, `path`),
   UNIQUE KEY `uk_code` (`code`),
+  UNIQUE KEY `uk_parentCode_name` (`parent_code`, `name`),
   KEY `idx_path` (`path`),
   KEY `idx_isPublic` (`is_public`),
   KEY `idx_isEnable` (`is_enable`)
@@ -52,7 +56,7 @@ CREATE TABLE `{{%permission_menu}}` (
 -- ----------------------------
 --  Table structure for `{{%permission_menu_api}}`
 -- ----------------------------
-CREATE TABLE `{{%permission_menu_api}}` (
+CREATE TABLE `portal_permission_menu_api` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增ID',
   `menu_code` varchar(50) NOT NULL COMMENT '菜单、按钮代码',
   `api_code` varchar(50) NOT NULL COMMENT 'api代码',
@@ -68,10 +72,12 @@ CREATE TABLE `{{%permission_menu_api}}` (
 -- ----------------------------
 --  Table structure for `{{%permission_role}}`
 -- ----------------------------
-CREATE TABLE `{{%permission_role}}` (
+CREATE TABLE `portal_permission_role` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增ID',
   `code` varchar(50) NOT NULL COMMENT '角色代码',
+  `name` varchar(50) NOT NULL COMMENT '角色名称',
   `remark` varchar(200) NOT NULL DEFAULT '' COMMENT '角色描述',
+  `sort_order` tinyint(4) unsigned NOT NULL DEFAULT '0' COMMENT '显示排序',
 
   `is_enable` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT '是否启用',
 
@@ -80,7 +86,8 @@ CREATE TABLE `{{%permission_role}}` (
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_code` (`code`)
+  UNIQUE KEY `uk_code` (`code`),
+  UNIQUE KEY `uk_name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='角色信息表';
 
 
@@ -88,7 +95,7 @@ CREATE TABLE `{{%permission_role}}` (
 -- ----------------------------
 --  Table structure for `{{%permission_role_menu}}`
 -- ----------------------------
-CREATE TABLE `{{%permission_role_menu}}` (
+CREATE TABLE `portal_permission_role_menu` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增ID',
   `role_code` varchar(50) NOT NULL COMMENT '角色代码',
   `menu_code` varchar(50) NOT NULL COMMENT '菜单、按钮代码',
@@ -105,7 +112,7 @@ CREATE TABLE `{{%permission_role_menu}}` (
 -- ----------------------------
 --  Table structure for `{{%permission_user_role}}`
 -- ----------------------------
-CREATE TABLE `{{%permission_user_role}}` (
+CREATE TABLE `portal_permission_user_role` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增ID',
   `uid` bigint(20) unsigned NOT NULL COMMENT '用户ID',
   `role_code` varchar(50) NOT NULL COMMENT '角色代码',

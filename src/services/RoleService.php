@@ -42,7 +42,7 @@ class RoleService extends Service implements IRoleService
             'is_enable',
         ]);
         // like 查询
-        $this->likeWhere($query, $params, ['remark']);
+        $this->likeWhere($query, $params, ['name']);
         return Pager::getInstance()->pagination($query, $params['pageNo'], $params['pageSize']);
     }
 

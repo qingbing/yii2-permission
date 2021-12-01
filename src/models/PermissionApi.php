@@ -14,6 +14,7 @@ use Zf\Helper\Exceptions\BusinessException;
  * @property string $path API路径
  * @property string $remark 路径描述
  * @property string|null $exts 扩展信息
+ * @property int $sort_order 显示排序
  * @property int $is_public 是否公共路径，公共路径不需要权限
  * @property int $is_enable 是否启用
  * @property string $operate_ip 操作IP
@@ -41,7 +42,7 @@ class PermissionApi extends Model
         return [
             [['code'], 'required'],
             [['exts', 'created_at', 'updated_at'], 'safe'],
-            [['is_public', 'is_enable', 'operate_uid'], 'integer'],
+            [['sort_order', 'is_public', 'is_enable', 'operate_uid'], 'integer'],
             [['code'], 'string', 'max' => 50],
             [['path', 'remark'], 'string', 'max' => 200],
             [['operate_ip'], 'string', 'max' => 15],
@@ -60,6 +61,7 @@ class PermissionApi extends Model
             'path'        => 'API路径',
             'remark'      => '路径描述',
             'exts'        => '扩展信息',
+            'sort_order'  => '显示排序',
             'is_public'   => '是否公共路径，公共路径不需要权限',
             'is_enable'   => '是否启用',
             'operate_ip'  => '操作IP',

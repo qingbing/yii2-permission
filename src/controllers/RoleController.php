@@ -42,7 +42,7 @@ class RoleController extends RestController
         $params = $this->validateParams([
             ['id', 'integer', 'label' => '角色ID'],
             ['code', 'string', 'label' => '角色标识'],
-            ['remark', 'string', 'label' => '角色描述'],
+            ['name', 'string', 'label' => '角色描述'],
             ['is_enable', 'in', 'label' => '启用状态', 'range' => array_keys(TLabelEnable::enableLabels())],
         ], null, true);
 
@@ -62,9 +62,11 @@ class RoleController extends RestController
     {
         // 参数验证和获取
         $params = $this->validateParams([
-            [['remark'], 'required'],
-            ['remark', 'unique', 'label' => '角色描述', 'targetClass' => PermissionRole::class, 'targetAttribute' => 'remark'],
+            [['name'], 'required'],
+            ['name', 'unique', 'label' => '角色名称', 'targetClass' => PermissionRole::class, 'targetAttribute' => 'remark'],
             ['code', 'unique', 'label' => '角色代码', 'targetClass' => PermissionRole::class, 'targetAttribute' => 'code'],
+            ['remark', 'string', 'label' => '描述'],
+            ['sort_order', 'integer', 'label' => '排序', 'default' => 0],
             ['is_enable', 'in', 'label' => '启用状态', 'range' => array_keys(TLabelEnable::enableLabels())],
         ], null);
 
@@ -85,9 +87,11 @@ class RoleController extends RestController
         // 参数验证和获取
         $id     = $this->getParam('id');
         $params = $this->validateParams([
-            [['id', 'remark'], 'required'],
+            [['id', 'name'], 'required'],
             ['id', 'exist', 'label' => '角色ID', 'targetClass' => PermissionRole::class, 'targetAttribute' => 'id'],
-            ['remark', 'unique', 'label' => '角色描述', 'targetClass' => PermissionRole::class, 'targetAttribute' => 'remark', 'filter' => ['!=', 'id', $id]],
+            ['name', 'unique', 'label' => '角色名称', 'targetClass' => PermissionRole::class, 'targetAttribute' => 'name', 'filter' => ['!=', 'id', $id]],
+            ['remark', 'string', 'label' => '描述'],
+            ['sort_order', 'integer', 'label' => '排序', 'default' => 0],
             ['is_enable', 'in', 'label' => '启用状态', 'range' => array_keys(TLabelEnable::enableLabels())],
         ], null);
 

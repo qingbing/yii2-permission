@@ -15,8 +15,10 @@ use YiiPermission\models\traits\TPermissionModelBehavior;
  * @property string $path 菜单路径
  * @property string $parent_code 上级标识
  * @property string $code 菜单标识
+ * @property string $name 菜单名称
  * @property string $remark 路径描述
  * @property string|null $exts 扩展信息
+ * @property int $sort_order 显示排序
  * @property int $is_public 是否公共路径，公共路径不需要权限
  * @property int $is_enable 是否启用
  * @property string $operate_ip 操作IP
@@ -47,15 +49,16 @@ class PermissionMenu extends Model
     public function rules()
     {
         return [
-            [['type', 'code'], 'required'],
+            [['type', 'code', 'name'], 'required'],
             [['exts', 'created_at', 'updated_at'], 'safe'],
-            [['is_public', 'is_enable', 'operate_uid'], 'integer'],
+            [['sort_order', 'is_public', 'is_enable', 'operate_uid'], 'integer'],
             [['type'], 'string', 'max' => 20],
             [['path', 'remark'], 'string', 'max' => 200],
-            [['parent_code', 'code'], 'string', 'max' => 50],
+            [['parent_code', 'code', 'name'], 'string', 'max' => 50],
             [['operate_ip'], 'string', 'max' => 15],
             [['type', 'path'], 'unique', 'targetAttribute' => ['type', 'path']],
             [['code'], 'unique'],
+            [['parent_code', 'name'], 'unique', 'targetAttribute' => ['parent_code', 'name']],
         ];
     }
 
@@ -70,8 +73,10 @@ class PermissionMenu extends Model
             'path'        => '菜单路径',
             'parent_code' => '上级标识',
             'code'        => '菜单标识',
+            'name'        => '菜单名称',
             'remark'      => '路径描述',
             'exts'        => '扩展信息',
+            'sort_order'  => '显示排序',
             'is_public'   => '是否公共路径，公共路径不需要权限',
             'is_enable'   => '是否启用',
             'operate_ip'  => '操作IP',

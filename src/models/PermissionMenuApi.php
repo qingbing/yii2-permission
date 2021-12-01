@@ -6,8 +6,7 @@ use YiiHelper\abstracts\Model;
 use YiiPermission\models\traits\TPermissionModelBehavior;
 
 /**
- * 模型 : 菜单、按钮拥有的api关联
- * This is the model class for table "portal_permission_menu_path".
+ * This is the model class for table "portal_permission_menu_api".
  *
  * @property int $id 自增ID
  * @property string $menu_code 菜单、按钮代码

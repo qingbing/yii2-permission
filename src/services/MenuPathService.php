@@ -44,7 +44,7 @@ class MenuPathService extends Service implements IMenuPathService
             'is_enable',
         ]);
         // like 查询
-        $this->likeWhere($query, $params, ['path', 'remark']);
+        $this->likeWhere($query, $params, ['path', 'name']);
         return Pager::getInstance()->pagination($query, $params['pageNo'], $params['pageSize']);
     }
 

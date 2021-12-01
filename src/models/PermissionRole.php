@@ -11,7 +11,9 @@ use Zf\Helper\Exceptions\BusinessException;
  *
  * @property int $id 自增ID
  * @property string $code 角色代码
+ * @property string $name 角色名称
  * @property string $remark 角色描述
+ * @property int $sort_order 显示排序
  * @property int $is_enable 是否启用
  * @property string $operate_ip 操作IP
  * @property int $operate_uid 操作UID
@@ -40,13 +42,14 @@ class PermissionRole extends Model
     public function rules()
     {
         return [
-            [['code'], 'required'],
-            [['is_enable', 'operate_uid'], 'integer'],
+            [['code', 'name'], 'required'],
+            [['sort_order', 'is_enable', 'operate_uid'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
-            [['code'], 'string', 'max' => 50],
+            [['code', 'name'], 'string', 'max' => 50],
             [['remark'], 'string', 'max' => 200],
             [['operate_ip'], 'string', 'max' => 15],
             [['code'], 'unique'],
+            [['name'], 'unique'],
         ];
     }
 
@@ -58,7 +61,9 @@ class PermissionRole extends Model
         return [
             'id'          => '自增ID',
             'code'        => '角色代码',
+            'name'        => '角色名称',
             'remark'      => '角色描述',
+            'sort_order'  => '显示排序',
             'is_enable'   => '是否启用',
             'operate_ip'  => '操作IP',
             'operate_uid' => '操作UID',

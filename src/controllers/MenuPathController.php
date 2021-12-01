@@ -44,7 +44,7 @@ class MenuPathController extends RestController
             ['type', 'in', 'label' => '菜单类型', 'range' => array_keys(PermissionMenu::types())],
             ['parent_code', 'exist', 'label' => '上级标识', 'targetClass' => PermissionMenu::class, 'targetAttribute' => 'code'],
             ['path', 'string', 'label' => '菜单路径'],
-            ['remark', 'string', 'label' => '菜单描述'],
+            ['name', 'string', 'label' => '菜单名'],
             ['is_public', 'in', 'label' => '公共路径', 'range' => array_keys(TLabelYesNo::isLabels())],
             ['is_enable', 'in', 'label' => '启用状态', 'range' => array_keys(TLabelEnable::enableLabels())],
         ], null, true);
@@ -64,19 +64,22 @@ class MenuPathController extends RestController
     public function actionAdd()
     {
         // 参数验证和获取
-        $type   = $this->getParam('type');
-        $rules  = [
-            [['type', 'path', 'remark'], 'required'],
+        $type       = $this->getParam('type');
+        $parentCode = $this->getParam('parent_code', '');
+        $rules      = [
+            [['type', 'path', 'name'], 'required'],
             ['type', 'in', 'label' => '菜单类型', 'range' => array_keys(PermissionMenu::types())],
             ['path', 'unique', 'label' => '菜单路径', 'targetClass' => PermissionMenu::class, 'targetAttribute' => 'path', 'filter' => ['=', 'type', $type]],
             ['code', 'unique', 'label' => '菜单标识', 'targetClass' => PermissionMenu::class, 'targetAttribute' => 'code', 'filter' => ['=', 'type', $type]],
-            ['parent_code', 'exist', 'label' => '上级标识', 'targetClass' => PermissionMenu::class, 'targetAttribute' => 'code'],
-            ['remark', 'unique', 'label' => '菜单描述', 'targetClass' => PermissionMenu::class, 'targetAttribute' => 'remark'],
+            ['parent_code', 'exist', 'label' => '上级标识', 'targetClass' => PermissionMenu::class, 'targetAttribute' => 'code', 'filter' => ['=', 'type', $type]],
+            ['name', 'unique', 'label' => '菜单名称', 'targetClass' => PermissionMenu::class, 'targetAttribute' => 'name', 'filter' => ['=', 'parent_code', $parentCode]],
+            ['remark', 'string', 'label' => '菜单描述'],
+            ['sort_order', 'integer', 'label' => '排序', 'default' => 0],
             ['exts', JsonValidator::class, 'label' => '扩展信息'],
             ['is_public', 'in', 'label' => '公共路径', 'range' => array_keys(TLabelYesNo::isLabels())],
             ['is_enable', 'in', 'label' => '启用状态', 'range' => array_keys(TLabelEnable::enableLabels())],
         ];
-        $params = $this->validateParams($rules, null);
+        $params     = $this->validateParams($rules, null);
         // 业务处理
         $res = $this->service->add($params);
         // 渲染结果
@@ -93,11 +96,27 @@ class MenuPathController extends RestController
     {
         // 参数验证和获取
         $id     = $this->getParam('id');
+        $model  = PermissionMenu::findOne([
+            'id' => $this->getParam('id')
+        ]);
         $params = $this->validateParams([
-            [['id', 'remark'], 'required'],
+            [['id', 'name'], 'required'],
             ['id', 'exist', 'label' => '菜单ID', 'targetClass' => PermissionMenu::class, 'targetAttribute' => 'id'],
-            ['remark', 'unique', 'label' => '菜单描述', 'targetClass' => PermissionMenu::class, 'targetAttribute' => 'remark', 'filter' => ['!=', 'id', $id]],
+            [
+                'name',
+                'unique',
+                'label'           => '菜单名称',
+                'targetClass'     => PermissionMenu::class,
+                'targetAttribute' => 'name',
+                'filter'          => [
+                    'and',
+                    ['=', 'parent_code', $model->parent_code],
+                    ['!=', 'id', $id],
+                ]
+            ],
+            ['remark', 'string', 'label' => '菜单描述'],
             ['exts', JsonValidator::class, 'label' => '扩展信息'],
+            ['sort_order', 'integer', 'label' => '排序', 'default' => 0],
             ['is_public', 'in', 'label' => '公共路径', 'range' => array_keys(TLabelYesNo::isLabels())],
             ['is_enable', 'in', 'label' => '启用状态', 'range' => array_keys(TLabelEnable::enableLabels())],
         ], null);
