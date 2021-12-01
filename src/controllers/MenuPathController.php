@@ -74,6 +74,7 @@ class MenuPathController extends RestController
             ['parent_code', 'exist', 'label' => '上级标识', 'targetClass' => PermissionMenu::class, 'targetAttribute' => 'code', 'filter' => ['=', 'type', $type]],
             ['name', 'unique', 'label' => '菜单名称', 'targetClass' => PermissionMenu::class, 'targetAttribute' => 'name', 'filter' => ['=', 'parent_code', $parentCode]],
             ['remark', 'string', 'label' => '菜单描述'],
+            ['icon', 'string', 'label' => '菜单图标'],
             ['sort_order', 'integer', 'label' => '排序', 'default' => 0],
             ['exts', JsonValidator::class, 'label' => '扩展信息'],
             ['is_public', 'in', 'label' => '公共路径', 'range' => array_keys(TLabelYesNo::isLabels())],
@@ -115,6 +116,7 @@ class MenuPathController extends RestController
                 ]
             ],
             ['remark', 'string', 'label' => '菜单描述'],
+            ['icon', 'string', 'label' => '菜单图标'],
             ['exts', JsonValidator::class, 'label' => '扩展信息'],
             ['sort_order', 'integer', 'label' => '排序', 'default' => 0],
             ['is_public', 'in', 'label' => '公共路径', 'range' => array_keys(TLabelYesNo::isLabels())],

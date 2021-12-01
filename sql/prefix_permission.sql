@@ -32,6 +32,7 @@ CREATE TABLE `portal_permission_menu` (
   `parent_code` varchar(50) NOT NULL DEFAULT '' COMMENT '上级标识',
   `code` varchar(50) NOT NULL COMMENT '菜单标识',
   `name` varchar(50) NOT NULL COMMENT '菜单名称',
+  `icon` varchar(50) NOT NULL DEFAULT 'el-icon-menu' COMMENT '菜单标签',
   `remark` varchar(200) NOT NULL DEFAULT '' COMMENT '路径描述',
   `exts` json DEFAULT NULL COMMENT '扩展信息',
   `sort_order` tinyint(4) unsigned NOT NULL DEFAULT '0' COMMENT '显示排序',

@@ -16,6 +16,7 @@ use YiiPermission\models\traits\TPermissionModelBehavior;
  * @property string $parent_code 上级标识
  * @property string $code 菜单标识
  * @property string $name 菜单名称
+ * @property string $icon 菜单标签
  * @property string $remark 路径描述
  * @property string|null $exts 扩展信息
  * @property int $sort_order 显示排序
@@ -54,7 +55,7 @@ class PermissionMenu extends Model
             [['sort_order', 'is_public', 'is_enable', 'operate_uid'], 'integer'],
             [['type'], 'string', 'max' => 20],
             [['path', 'remark'], 'string', 'max' => 200],
-            [['parent_code', 'code', 'name'], 'string', 'max' => 50],
+            [['parent_code', 'code', 'name', 'icon'], 'string', 'max' => 50],
             [['operate_ip'], 'string', 'max' => 15],
             [['type', 'path'], 'unique', 'targetAttribute' => ['type', 'path']],
             [['code'], 'unique'],
@@ -74,6 +75,7 @@ class PermissionMenu extends Model
             'parent_code' => '上级标识',
             'code'        => '菜单标识',
             'name'        => '菜单名称',
+            'icon'        => '菜单标签',
             'remark'      => '路径描述',
             'exts'        => '扩展信息',
             'sort_order'  => '显示排序',
