@@ -34,7 +34,7 @@ class RoleService extends Service implements IRoleService
     public function list(array $params = []): array
     {
         $query = PermissionRole::find()
-            ->orderBy('id ASC');
+            ->orderBy('sort_order DESC, id ASC');
         // 等于查询
         $this->attributeWhere($query, $params, [
             'id',

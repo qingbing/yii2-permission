@@ -33,7 +33,7 @@ class ApiPathService extends Service implements IApiPathService
     public function list(array $params = []): array
     {
         $query = PermissionApi::find()
-            ->orderBy('path ASC');
+            ->orderBy('sort_order DESC, path ASC');
         // 等于查询
         $this->attributeWhere($query, $params, [
             'is_public',

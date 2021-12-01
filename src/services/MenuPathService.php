@@ -35,7 +35,7 @@ class MenuPathService extends Service implements IMenuPathService
     public function list(array $params = []): array
     {
         $query = PermissionMenu::find()
-            ->orderBy('type ASC, path ASC');
+            ->orderBy('type ASC, sort_order DESC, path ASC');
         // 等于查询
         $this->attributeWhere($query, $params, [
             'type',
