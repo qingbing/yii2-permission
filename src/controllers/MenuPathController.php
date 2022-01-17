@@ -16,7 +16,6 @@ use YiiPermission\models\PermissionApi;
 use YiiPermission\models\PermissionMenu;
 use YiiPermission\services\MenuPathService;
 use Zf\Helper\Traits\Models\TLabelEnable;
-use Zf\Helper\Traits\Models\TLabelYesNo;
 
 /**
  * 控制器 : 菜单管理
@@ -45,7 +44,7 @@ class MenuPathController extends RestController
             ['parent_code', 'exist', 'label' => '上级标识', 'targetClass' => PermissionMenu::class, 'targetAttribute' => 'code'],
             ['path', 'string', 'label' => '菜单路径'],
             ['name', 'string', 'label' => '菜单名'],
-            ['is_public', 'in', 'label' => '公共路径', 'range' => array_keys(TLabelYesNo::isLabels())],
+            ['is_public', 'boolean', 'label' => '公共路径'],
             ['is_enable', 'in', 'label' => '启用状态', 'range' => array_keys(TLabelEnable::enableLabels())],
         ], null, true);
 
@@ -77,7 +76,7 @@ class MenuPathController extends RestController
             ['icon', 'string', 'label' => '菜单图标'],
             ['sort_order', 'integer', 'label' => '排序', 'default' => 0],
             ['exts', JsonValidator::class, 'label' => '扩展信息'],
-            ['is_public', 'in', 'label' => '公共路径', 'range' => array_keys(TLabelYesNo::isLabels())],
+            ['is_public', 'boolean', 'label' => '公共路径'],
             ['is_enable', 'in', 'label' => '启用状态', 'range' => array_keys(TLabelEnable::enableLabels())],
         ];
         $params     = $this->validateParams($rules, null);
@@ -119,7 +118,7 @@ class MenuPathController extends RestController
             ['icon', 'string', 'label' => '菜单图标'],
             ['exts', JsonValidator::class, 'label' => '扩展信息'],
             ['sort_order', 'integer', 'label' => '排序', 'default' => 0],
-            ['is_public', 'in', 'label' => '公共路径', 'range' => array_keys(TLabelYesNo::isLabels())],
+            ['is_public', 'boolean', 'label' => '公共路径'],
             ['is_enable', 'in', 'label' => '启用状态', 'range' => array_keys(TLabelEnable::enableLabels())],
         ], null);
 
@@ -180,7 +179,7 @@ class MenuPathController extends RestController
         // 参数验证和获取
         $params = $this->validateParams([
             [['id', 'is_enable', 'api_codes'], 'required'],
-            ['is_enable', 'in', 'label' => '是否有效', 'range' => array_keys(TLabelYesNo::isLabels())],
+            ['is_enable', 'in', 'label' => '是否有效', 'range' => array_keys(TLabelEnable::enableLabels())],
             ['id', 'exist', 'label' => '菜单ID', 'targetClass' => PermissionMenu::class, 'targetAttribute' => 'id'],
             [
                 'api_codes',

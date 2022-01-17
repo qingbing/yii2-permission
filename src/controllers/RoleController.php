@@ -15,7 +15,6 @@ use YiiPermission\models\PermissionMenu;
 use YiiPermission\models\PermissionRole;
 use YiiPermission\services\RoleService;
 use Zf\Helper\Traits\Models\TLabelEnable;
-use Zf\Helper\Traits\Models\TLabelYesNo;
 
 /**
  * 控制器 : 角色管理
@@ -152,7 +151,7 @@ class RoleController extends RestController
         // 参数验证和获取
         $params = $this->validateParams([
             [['id', 'is_enable', 'menu_codes'], 'required'],
-            ['is_enable', 'in', 'label' => '是否有效', 'range' => array_keys(TLabelYesNo::isLabels())],
+            ['is_enable', 'boolean', 'label' => '是否有效'],
             ['id', 'exist', 'label' => '角色ID', 'targetClass' => PermissionRole::class, 'targetAttribute' => 'id'],
             [
                 'menu_codes',

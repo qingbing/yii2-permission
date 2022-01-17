@@ -15,7 +15,6 @@ use YiiPermission\interfaces\IApiPathService;
 use YiiPermission\models\PermissionApi;
 use YiiPermission\services\ApiPathService;
 use Zf\Helper\Traits\Models\TLabelEnable;
-use Zf\Helper\Traits\Models\TLabelYesNo;
 
 /**
  * 控制器 : api后端路径管理
@@ -42,7 +41,7 @@ class ApiPathController extends RestController
         $params = $this->validateParams([
             ['path', 'string', 'label' => 'API路径'],
             ['remark', 'string', 'label' => '路径描述'],
-            ['is_public', 'in', 'label' => '公共路径', 'range' => array_keys(TLabelYesNo::isLabels())],
+            ['is_public', 'boolean', 'label' => '公共路径'],
             ['is_enable', 'in', 'label' => '启用状态', 'range' => array_keys(TLabelEnable::enableLabels())],
         ], null, true);
 
@@ -67,7 +66,7 @@ class ApiPathController extends RestController
             ['remark', 'unique', 'label' => '路径描述', 'targetClass' => PermissionApi::class, 'targetAttribute' => 'remark'],
             ['sort_order', 'integer', 'label' => '排序', 'default' => 0],
             ['exts', JsonValidator::class, 'label' => '扩展信息'],
-            ['is_public', 'in', 'label' => '公共路径', 'range' => array_keys(TLabelYesNo::isLabels())],
+            ['is_public', 'boolean', 'label' => '公共路径'],
             ['is_enable', 'in', 'label' => '启用状态', 'range' => array_keys(TLabelEnable::enableLabels())],
         ], null);
 
@@ -93,7 +92,7 @@ class ApiPathController extends RestController
             ['remark', 'unique', 'label' => '路径描述', 'targetClass' => PermissionApi::class, 'targetAttribute' => 'remark', 'filter' => ['!=', 'id', $id]],
             ['sort_order', 'integer', 'label' => '排序', 'default' => 0],
             ['exts', JsonValidator::class, 'label' => '扩展信息'],
-            ['is_public', 'in', 'label' => '公共路径', 'range' => array_keys(TLabelYesNo::isLabels())],
+            ['is_public', 'boolean', 'label' => '公共路径'],
             ['is_enable', 'in', 'label' => '启用状态', 'range' => array_keys(TLabelEnable::enableLabels())],
         ], null);
 
