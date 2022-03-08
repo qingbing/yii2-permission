@@ -5,6 +5,7 @@ namespace YiiPermission\models;
 use YiiHelper\abstracts\Model;
 use YiiHelper\helpers\AppHelper;
 use YiiPermission\models\traits\TPermissionModelBehavior;
+use Zf\Helper\Exceptions\BusinessException;
 
 /**
  * 模型 : 前端url路径信息
@@ -31,6 +32,8 @@ use YiiPermission\models\traits\TPermissionModelBehavior;
  * @property-read int $apiCount
  * @property-read PermissionRole[] $roles
  * @property-read int $roleCount
+ * @property-read PermissionMenu $parent
+ * @property-read PermissionMenu[] $children
  */
 class PermissionMenu extends Model
 {
@@ -96,19 +99,59 @@ class PermissionMenu extends Model
     const TYPE_CUSTOM = 'custom'; // 自定义
 
     /**
-     * 菜单类型
+     * 菜单类型映射关系
      *
      * @return array
      */
-    public static function types()
+    public static function typeMap()
     {
-        return AppHelper::app()->getParam('permissionMenuTypes', [
+        return AppHelper::app()->getParam('permissionMenuTypeMap', [
             self::TYPE_MENU   => '菜单',
             self::TYPE_HELP   => '帮助中心',
             self::TYPE_TOP    => '顶端菜单',
             self::TYPE_FOOTER => '底部菜单',
             self::TYPE_BUTTON => '按钮',
-            self::TYPE_CUSTOM => '自定义',
+            //self::TYPE_CUSTOM => '自定义',
+        ]);
+    }
+
+    /**
+     * 菜单树映射关系
+     *
+     * @return array
+     */
+    public static function treeMap()
+    {
+        return AppHelper::app()->getParam('permissionMenuTreeMap', [
+            self::TYPE_MENU   => '菜单',
+            self::TYPE_HELP   => '帮助中心',
+            self::TYPE_TOP    => '顶端菜单',
+            self::TYPE_FOOTER => '底部菜单',
+            //self::TYPE_CUSTOM => '自定义',
+        ]);
+    }
+
+    /**
+     * 关联 : 获取上级菜单
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getParent()
+    {
+        return $this->hasOne(PermissionMenu::class, [
+            'code' => 'parent_code',
+        ]);
+    }
+
+    /**
+     * 关联 : 获取上级菜单
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getChildren()
+    {
+        return $this->hasMany(PermissionMenu::class, [
+            'parent_code' => 'code',
         ]);
     }
 
@@ -168,9 +211,14 @@ class PermissionMenu extends Model
      * 检查是否可以删除
      *
      * @return bool
+     * @throws BusinessException
      */
     public function beforeDelete()
     {
+        $children = $this->children;
+        if (count($children) > 0) {
+            throw new BusinessException("请先删除所有子菜单");
+        }
         // 删除 menu-api 的关联关系
         PermissionMenuApi::deleteAll(['menu_code' => $this->code]);
         // 删除 role-menu 的关联关系

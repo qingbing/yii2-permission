@@ -10,12 +10,15 @@ namespace YiiPermission\services;
 
 use Exception;
 use Throwable;
+use yii\db\Query;
 use YiiHelper\abstracts\Service;
 use YiiHelper\helpers\Pager;
 use YiiPermission\interfaces\IMenuPathService;
 use YiiPermission\models\PermissionMenu;
 use YiiPermission\models\PermissionMenuApi;
+use Zf\Helper\Business\ObjectTree;
 use Zf\Helper\Exceptions\BusinessException;
+use Zf\Helper\Traits\Models\TLabelYesNo;
 use Zf\Helper\Util;
 
 /**
@@ -27,6 +30,59 @@ use Zf\Helper\Util;
 class MenuPathService extends Service implements IMenuPathService
 {
     /**
+     * 菜单类型映射关系
+     *
+     * @return array
+     */
+    public function typeMap(): array
+    {
+        return PermissionMenu::typeMap();
+    }
+
+    /**
+     * 菜单树映射关系
+     *
+     * @return array
+     */
+    public function treeMap(): array
+    {
+        return PermissionMenu::treeMap();
+    }
+
+    /**
+     * 树形结构
+     *
+     * @param array $params
+     * @return array
+     */
+    public function tree(array $params = []): array
+    {
+        $query = PermissionMenu::find()
+            ->andWhere(['=', 'type', $params['type']])
+            ->orWhere('parent_code!=:parent_code AND type=:type', [
+                ':parent_code' => '',
+                ':type'        => PermissionMenu::TYPE_BUTTON,
+            ]);
+        if ($params['onlyDisable']) {
+            $query->andWhere(['=', 'is_enable', IS_ENABLE_YES]);
+        }
+        if (!$params['containButton']) {
+            $query->andWhere(['!=', 'type', PermissionMenu::TYPE_BUTTON]);
+        }
+        $data = $query->asArray()
+            ->all();
+
+        return ObjectTree::getInstance()
+            ->setSourceData($data)
+            ->setTopTag('')
+            ->setPid('parent_code')
+            ->setId('code')
+            ->setReturnArray(true)
+            ->setSubDataName('children')
+            ->getTreeData();
+    }
+
+    /**
      * 菜单列表
      *
      * @param array|null $params
@@ -35,49 +91,59 @@ class MenuPathService extends Service implements IMenuPathService
     public function list(array $params = []): array
     {
         $query = PermissionMenu::find()
-            ->orderBy('type ASC, sort_order DESC, path ASC');
+            ->alias('pm')
+            ->select('pm.*, parent.name AS parent_name')
+            ->leftJoin(PermissionMenu::tableName() . ' AS parent', 'pm.parent_code=parent.code')
+            ->orderBy('pm.type ASC, pm.sort_order DESC, pm.path ASC');
         // 等于查询
         $this->attributeWhere($query, $params, [
-            'type',
-            'parent_code',
-            'is_public',
-            'is_enable',
+            'pm.type'        => 'type',
+            'pm.parent_code' => 'parent_code',
+            'pm.is_public'   => 'is_public',
+            'pm.is_enable'   => 'is_enable',
         ]);
         // like 查询
-        $this->likeWhere($query, $params, ['path', 'name']);
-        return Pager::getInstance()->pagination($query, $params['pageNo'], $params['pageSize']);
+        $this->likeWhere($query, $params, [
+            'pm.path' => 'path',
+            'pm.name' => 'name',
+        ]);
+        return Pager::getInstance()
+            ->setAsArray(true)
+            ->pagination($query, $params['pageNo'], $params['pageSize']);
     }
 
     /**
      * 添加菜单
      *
      * @param array $params
-     * @return bool
+     * @return array
      * @throws Exception
      */
-    public function add(array $params): bool
+    public function add(array $params): array
     {
         $model = new PermissionMenu();
         $model->setFilterAttributes($params);
         if (!isset($params['code']) || empty($params['code'])) {
             $model->code = $params['type'] . '_' . Util::uniqid();
         }
-        return $model->saveOrException();
+        $model->saveOrException();
+        return $model->attributes;
     }
 
     /**
      * 编辑菜单
      *
      * @param array $params
-     * @return bool
+     * @return array
      * @throws Exception
      */
-    public function edit(array $params): bool
+    public function edit(array $params): array
     {
         $model = $this->getModel($params);
         unset($params['id']);
         $model->setFilterAttributes($params);
-        return $model->saveOrException();
+        $model->saveOrException();
+        return $model->attributes;
     }
 
     /**
@@ -102,7 +168,11 @@ class MenuPathService extends Service implements IMenuPathService
      */
     public function view(array $params)
     {
-        return $this->getModel($params);
+        $model                     = $this->getModel($params);
+        $attributes                = $model->getAttributes();
+        $attributes['parent_code'] = $model->parent ? $model->parent->parent_code : '';
+        $attributes['parent_name'] = $model->parent ? $model->parent->name : '';
+        return $attributes;
     }
 
     /**

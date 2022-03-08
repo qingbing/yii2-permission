@@ -16,6 +16,7 @@ use YiiPermission\models\PermissionApi;
 use YiiPermission\models\PermissionMenu;
 use YiiPermission\services\MenuPathService;
 use Zf\Helper\Traits\Models\TLabelEnable;
+use Zf\Helper\Traits\Models\TLabelYesNo;
 
 /**
  * 控制器 : 菜单管理
@@ -31,6 +32,55 @@ class MenuPathController extends RestController
     public $serviceClass     = MenuPathService::class;
 
     /**
+     * 菜单类型映射关系
+     *
+     * @return array
+     * @throws Exception
+     */
+    public function actionTypeMap()
+    {
+        // 业务处理
+        $res = $this->service->typeMap();
+        // 渲染结果
+        return $this->success($res, '菜单类型映射关系');
+    }
+
+    /**
+     * 菜单树映射关系
+     *
+     * @return array
+     * @throws Exception
+     */
+    public function actionTreeMap()
+    {
+        // 业务处理
+        $res = $this->service->treeMap();
+        // 渲染结果
+        return $this->success($res, '菜单型映射关系');
+    }
+
+    /**
+     * 树形结构
+     *
+     * @return array
+     * @throws Exception
+     */
+    public function actionTree()
+    {
+        // 参数验证和获取
+        $params = $this->validateParams([
+            [['type', 'containButton', 'onlyDisable'], 'required'],
+            ['type', 'in', 'label' => '菜单类型', 'default' => PermissionMenu::TYPE_MENU, 'range' => array_keys(PermissionMenu::treeMap())],
+            ['containButton', 'in', 'label' => '包含按钮', 'range' => array_keys(TLabelYesNo::yesNoLabels())],
+            ['onlyDisable', 'in', 'label' => '仅启用菜单', 'range' => array_keys(TLabelYesNo::yesNoLabels())],
+        ]);
+        // 业务处理
+        $res = $this->service->tree($params);
+        // 渲染结果
+        return $this->success($res, '树形结构');
+    }
+
+    /**
      * 菜单列表
      *
      * @return array
@@ -40,7 +90,7 @@ class MenuPathController extends RestController
     {
         // 参数验证和获取
         $params = $this->validateParams([
-            ['type', 'in', 'label' => '菜单类型', 'range' => array_keys(PermissionMenu::types())],
+            ['type', 'in', 'label' => '菜单类型', 'range' => array_keys(PermissionMenu::typeMap())],
             ['parent_code', 'exist', 'label' => '上级标识', 'targetClass' => PermissionMenu::class, 'targetAttribute' => 'code'],
             ['path', 'string', 'label' => '菜单路径'],
             ['name', 'string', 'label' => '菜单名'],
@@ -66,11 +116,11 @@ class MenuPathController extends RestController
         $type       = $this->getParam('type');
         $parentCode = $this->getParam('parent_code', '');
         $rules      = [
-            [['type', 'path', 'name'], 'required'],
-            ['type', 'in', 'label' => '菜单类型', 'range' => array_keys(PermissionMenu::types())],
+            [['type', 'name'], 'required'],
+            ['type', 'in', 'label' => '菜单类型', 'range' => array_keys(PermissionMenu::typeMap())],
             ['path', 'unique', 'label' => '菜单路径', 'targetClass' => PermissionMenu::class, 'targetAttribute' => 'path', 'filter' => ['=', 'type', $type]],
             ['code', 'unique', 'label' => '菜单标识', 'targetClass' => PermissionMenu::class, 'targetAttribute' => 'code', 'filter' => ['=', 'type', $type]],
-            ['parent_code', 'exist', 'label' => '上级标识', 'targetClass' => PermissionMenu::class, 'targetAttribute' => 'code', 'filter' => ['=', 'type', $type]],
+            ['parent_code', 'exist', 'label' => '上级菜单', 'targetClass' => PermissionMenu::class, 'targetAttribute' => 'code', 'filter' => ['=', 'type', $type]],
             ['name', 'unique', 'label' => '菜单名称', 'targetClass' => PermissionMenu::class, 'targetAttribute' => 'name', 'filter' => ['=', 'parent_code', $parentCode]],
             ['remark', 'string', 'label' => '菜单描述'],
             ['icon', 'string', 'label' => '菜单图标'],
@@ -102,6 +152,18 @@ class MenuPathController extends RestController
         $params = $this->validateParams([
             [['id', 'name'], 'required'],
             ['id', 'exist', 'label' => '菜单ID', 'targetClass' => PermissionMenu::class, 'targetAttribute' => 'id'],
+            [
+                'path',
+                'unique',
+                'label'           => '菜单路径',
+                'targetClass'     => PermissionMenu::class,
+                'targetAttribute' => 'path',
+                'filter'          => [
+                    'and',
+                    ['=', 'parent_code', $model->parent_code],
+                    ['!=', 'id', $id],
+                ]
+            ],
             [
                 'name',
                 'unique',

@@ -7,17 +7,36 @@
 
 namespace YiiPermission\interfaces;
 
-
-use YiiHelper\services\interfaces\ICurdService;
-
 /**
  * 接口 : 菜单管理
  *
  * Interface IMenuService
  * @package YiiPermission\interfaces
  */
-interface IMenuPathService extends ICurdService
+interface IMenuPathService
 {
+    /**
+     * 菜单类型映射关系
+     *
+     * @return array
+     */
+    public function typeMap(): array;
+
+    /**
+     * 菜单树映射关系
+     *
+     * @return array
+     */
+    public function treeMap(): array;
+
+    /**
+     * 树形结构
+     *
+     * @param array $params
+     * @return array
+     */
+    public function tree(array $params = []): array;
+
     /**
      * 为菜单分配api后端接口
      *
@@ -25,4 +44,43 @@ interface IMenuPathService extends ICurdService
      * @return bool
      */
     public function assignApiPath(array $params = []): bool;
+    /**
+     * 菜单列表
+     *
+     * @param array|null $params
+     * @return array
+     */
+    public function list(array $params = []): array;
+
+    /**
+     * 添加菜单
+     *
+     * @param array $params
+     * @return array
+     */
+    public function add(array $params): array;
+
+    /**
+     * 编辑菜单
+     *
+     * @param array $params
+     * @return array
+     */
+    public function edit(array $params): array;
+
+    /**
+     * 删除菜单
+     *
+     * @param array $params
+     * @return bool
+     */
+    public function del(array $params): bool;
+
+    /**
+     * 查看菜单详情
+     *
+     * @param array $params
+     * @return mixed
+     */
+    public function view(array $params);
 }
