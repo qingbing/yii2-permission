@@ -82,7 +82,7 @@ class PermissionLogic
         // 公共的api后端路径
         $paths = PermissionApi::getPublicApi(true, 1);
         // 公共的菜单
-        $menus = PermissionMenu::getPublicApi(true, 1);
+        $menus = PermissionMenu::getPublicPath(true, 1);
         return [
             'roles' => [],
             'menus' => $menus,

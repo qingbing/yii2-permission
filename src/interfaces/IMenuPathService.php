@@ -38,13 +38,6 @@ interface IMenuPathService
     public function tree(array $params = []): array;
 
     /**
-     * 为菜单分配api后端接口
-     *
-     * @param array|null $params
-     * @return bool
-     */
-    public function assignApiPath(array $params = []): bool;
-    /**
      * 菜单列表
      *
      * @param array|null $params
@@ -83,4 +76,20 @@ interface IMenuPathService
      * @return mixed
      */
     public function view(array $params);
+
+    /**
+     * 获取菜单已分配的api-codes
+     *
+     * @param array $params
+     * @return array
+     */
+    public function getAssignedApiPath(array $params);
+
+    /**
+     * 为菜单分配api后端接口
+     *
+     * @param array|null $params
+     * @return bool
+     */
+    public function assignApiPath(array $params): bool;
 }

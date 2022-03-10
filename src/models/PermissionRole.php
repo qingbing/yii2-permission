@@ -130,11 +130,13 @@ class PermissionRole extends Model
      */
     public function beforeDelete()
     {
-        if ($this->viaUserCount) {
-            throw new BusinessException("角色中还有有效的用户绑定关系，不能删除");
+        if ($this->is_enable && $this->viaUserCount) {
+            throw new BusinessException("启用角色中还有用户绑定关系，不能删除");
         }
         // 删除 role-menu 的关联关系
         PermissionRoleMenu::deleteAll(['role_code' => $this->code]);
+        // 删除 user-role 的关联关系
+        PermissionUserRole::deleteAll(['role_code' => $this->code]);
         return parent::beforeDelete();
     }
 }

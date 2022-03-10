@@ -11,6 +11,7 @@ namespace YiiPermission\services;
 use Exception;
 use Throwable;
 use yii\db\Query;
+use yii\helpers\Console;
 use YiiHelper\abstracts\Service;
 use YiiHelper\helpers\Pager;
 use YiiPermission\interfaces\IMenuPathService;
@@ -63,7 +64,7 @@ class MenuPathService extends Service implements IMenuPathService
                 ':parent_code' => '',
                 ':type'        => PermissionMenu::TYPE_BUTTON,
             ]);
-        if ($params['onlyDisable']) {
+        if ($params['onlyEnable']) {
             $query->andWhere(['=', 'is_enable', IS_ENABLE_YES]);
         }
         if (!$params['containButton']) {
@@ -176,36 +177,6 @@ class MenuPathService extends Service implements IMenuPathService
     }
 
     /**
-     * 为菜单分配api后端接口
-     *
-     * @param array $params
-     * @return bool
-     * @throws Exception
-     */
-    public function assignApiPath(array $params = []): bool
-    {
-        $model = $this->getModel($params);
-        if ($params['is_enable']) {
-            foreach ($params['api_codes'] as $api_code) {
-                $dbData   = [
-                    'menu_code' => $model->code,
-                    'api_code'  => $api_code,
-                ];
-                $viaModel = PermissionMenuApi::findOne($dbData);
-                $viaModel = $viaModel ?: new PermissionMenuApi();
-                $viaModel->setAttributes($dbData);
-                $viaModel->saveOrException();
-            }
-            return true;
-        } else {
-            return PermissionMenuApi::deleteAll([
-                'menu_code' => $model->code,
-                'api_code'  => $params['api_codes'],
-            ]);
-        }
-    }
-
-    /**
      * 获取当前操作模型
      *
      * @param array $params
@@ -216,6 +187,81 @@ class MenuPathService extends Service implements IMenuPathService
     {
         $model = PermissionMenu::findOne([
             'id' => $params['id'] ?? null
+        ]);
+        if (null === $model) {
+            throw new BusinessException("菜单不存在");
+        }
+        return $model;
+    }
+
+    /**
+     * 获取菜单已分配的api-codes
+     *
+     * @param array $params
+     * @return array
+     * @throws Exception
+     */
+    public function getAssignedApiPath(array $params)
+    {
+        $model = $this->getModelByCode($params);
+        return array_column($model->apis, 'code');
+    }
+
+    /**
+     * 为菜单分配api后端接口
+     *
+     * @param array $params
+     * @return bool
+     * @throws Throwable
+     * @throws Exception
+     */
+    public function assignApiPath(array $params): bool
+    {
+        $model            = $this->getModelByCode($params);
+        $menuCode         = $params['code'];
+        $assignedCodes    = array_column($model->apis, 'code');
+        $newAssignedCodes = $params['api_codes'];
+        $delCodes         = array_diff($assignedCodes, $newAssignedCodes);
+        $addCodes         = array_diff($newAssignedCodes, $assignedCodes);
+        return PermissionMenu::getDb()->transaction(function () use ($menuCode, $delCodes, $addCodes) {
+            if (!empty($delCodes)) {
+                // 删除的api
+                $status = PermissionMenuApi::deleteAll([
+                    'menu_code' => $menuCode,
+                    'api_code'  => $delCodes,
+                ]);
+                if (!$status) {
+                    throw new BusinessException("删除api-menu关联失败");
+                }
+            }
+            if (!empty($addCodes)) {
+                // 添加的api
+                foreach ($addCodes as $apiCode) {
+                    $dbData   = [
+                        'menu_code' => $menuCode,
+                        'api_code'  => $apiCode,
+                    ];
+                    $viaModel = PermissionMenuApi::findOne($dbData);
+                    $viaModel = $viaModel ?: new PermissionMenuApi();
+                    $viaModel->setAttributes($dbData);
+                    $viaModel->saveOrException();
+                }
+            }
+            return true;
+        });
+    }
+
+    /**
+     * 通过code获取当前操作模型
+     *
+     * @param array $params
+     * @return PermissionMenu
+     * @throws Exception
+     */
+    protected function getModelByCode(array $params): PermissionMenu
+    {
+        $model = PermissionMenu::findOne([
+            'code' => $params['code'] ?? null
         ]);
         if (null === $model) {
             throw new BusinessException("菜单不存在");

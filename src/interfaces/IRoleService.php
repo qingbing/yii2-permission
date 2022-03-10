@@ -19,6 +19,14 @@ use YiiHelper\services\interfaces\ICurdService;
 interface IRoleService extends ICurdService
 {
     /**
+     * 获取角色已分配的menu-codes
+     *
+     * @param array $params
+     * @return array
+     */
+    public function getAssignedMenu(array $params);
+
+    /**
      * 为角色分配菜单
      *
      * @param array $params

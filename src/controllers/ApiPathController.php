@@ -141,4 +141,18 @@ class ApiPathController extends RestController
         // 渲染结果
         return $this->success($res, '查看api后端路径详情');
     }
+
+    /**
+     * 所有API接口，为菜单分配api提供
+     *
+     * @return array
+     * @throws Exception
+     */
+    public function actionAllForTransfer()
+    {
+        // 业务处理
+        $res = $this->service->allForTransfer();
+        // 渲染结果
+        return $this->success($res, 'api后端路径列表');
+    }
 }

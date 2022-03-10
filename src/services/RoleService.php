@@ -34,7 +34,7 @@ class RoleService extends Service implements IRoleService
     public function list(array $params = []): array
     {
         $query = PermissionRole::find()
-            ->orderBy('sort_order DESC, id ASC');
+            ->orderBy('sort_order ASC, id ASC');
         // 等于查询
         $this->attributeWhere($query, $params, [
             'id',
@@ -104,37 +104,6 @@ class RoleService extends Service implements IRoleService
     }
 
     /**
-     * 为角色分配菜单
-     *
-     * @param array $params
-     * @return bool
-     * @throws Exception
-     */
-    public function assignMenu(array $params = []): bool
-    {
-        $model = $this->getModel($params);
-        if ($params['is_enable']) {
-
-            foreach ($params['menu_codes'] as $menu_code) {
-                $dbData   = [
-                    'role_code' => $model->code,
-                    'menu_code' => $menu_code,
-                ];
-                $viaModel = PermissionRoleMenu::findOne($dbData);
-                $viaModel = $viaModel ?: new PermissionRoleMenu();
-                $viaModel->setAttributes($dbData);
-                $viaModel->saveOrException();
-            }
-            return true;
-        } else {
-            return PermissionRoleMenu::deleteAll([
-                'role_code' => $model->code,
-                'menu_code' => $params['menu_codes'],
-            ]);
-        }
-    }
-
-    /**
      * 获取当前操作模型
      *
      * @param array $params
@@ -145,6 +114,81 @@ class RoleService extends Service implements IRoleService
     {
         $model = PermissionRole::findOne([
             'id' => $params['id'] ?? null
+        ]);
+        if (null === $model) {
+            throw new BusinessException("角色不存在");
+        }
+        return $model;
+    }
+
+    /**
+     * 获取角色已分配的menu-codes
+     *
+     * @param array $params
+     * @return array
+     * @throws Exception
+     */
+    public function getAssignedMenu(array $params)
+    {
+        $model = $this->getModelByCode($params);
+        return array_column($model->menus, 'code');
+    }
+
+    /**
+     * 为角色分配菜单
+     *
+     * @param array $params
+     * @return bool
+     * @throws Exception
+     * @throws \Throwable
+     */
+    public function assignMenu(array $params = []): bool
+    {
+        $model            = $this->getModelByCode($params);
+        $roleCode         = $params['code'];
+        $assignedCodes    = array_column($model->menus, 'code');
+        $newAssignedCodes = $params['menu_codes'];
+        $delCodes         = array_diff($assignedCodes, $newAssignedCodes);
+        $addCodes         = array_diff($newAssignedCodes, $assignedCodes);
+        return PermissionRole::getDb()->transaction(function () use ($roleCode, $delCodes, $addCodes) {
+            if (!empty($delCodes)) {
+                // 删除的api
+                $status = PermissionRoleMenu::deleteAll([
+                    'role_code' => $roleCode,
+                    'menu_code' => $delCodes,
+                ]);
+                if (!$status) {
+                    throw new BusinessException("删除user-menu关联失败");
+                }
+            }
+            if (!empty($addCodes)) {
+                // 添加的api
+                foreach ($addCodes as $menuCode) {
+                    $dbData   = [
+                        'role_code' => $roleCode,
+                        'menu_code' => $menuCode,
+                    ];
+                    $viaModel = PermissionRoleMenu::findOne($dbData);
+                    $viaModel = $viaModel ?: new PermissionRoleMenu();
+                    $viaModel->setAttributes($dbData);
+                    $viaModel->saveOrException();
+                }
+            }
+            return true;
+        });
+    }
+
+    /**
+     * 通过code获取当前操作模型
+     *
+     * @param array $params
+     * @return PermissionRole
+     * @throws Exception
+     */
+    protected function getModelByCode(array $params): PermissionRole
+    {
+        $model = PermissionRole::findOne([
+            'code' => $params['code'] ?? null
         ]);
         if (null === $model) {
             throw new BusinessException("角色不存在");

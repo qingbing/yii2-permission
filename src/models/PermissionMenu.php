@@ -233,7 +233,7 @@ class PermissionMenu extends Model
      * @param int $isEnable
      * @return array|\yii\db\ActiveRecord[]
      */
-    public static function getPublicApi($isOptions = true, $isEnable = 1)
+    public static function getPublicPath($isOptions = true, $isEnable = 1)
     {
         $query = static::find()
             ->andWhere(['=', 'is_public', 1]);

@@ -69,10 +69,10 @@ class MenuPathController extends RestController
     {
         // 参数验证和获取
         $params = $this->validateParams([
-            [['type', 'containButton', 'onlyDisable'], 'required'],
+            [['type', 'containButton', 'onlyEnable'], 'required'],
             ['type', 'in', 'label' => '菜单类型', 'default' => PermissionMenu::TYPE_MENU, 'range' => array_keys(PermissionMenu::treeMap())],
             ['containButton', 'in', 'label' => '包含按钮', 'range' => array_keys(TLabelYesNo::yesNoLabels())],
-            ['onlyDisable', 'in', 'label' => '仅启用菜单', 'range' => array_keys(TLabelYesNo::yesNoLabels())],
+            ['onlyEnable', 'in', 'label' => '仅启用菜单', 'range' => array_keys(TLabelYesNo::yesNoLabels())],
         ]);
         // 业务处理
         $res = $this->service->tree($params);
@@ -231,6 +231,25 @@ class MenuPathController extends RestController
     }
 
     /**
+     * 获取菜单已分配的api-codes
+     *
+     * @return array
+     * @throws Exception
+     */
+    public function actionGetAssignedApiPath()
+    {
+        // 参数验证和获取
+        $params = $this->validateParams([
+            [['code'], 'required'],
+            ['code', 'exist', 'label' => '菜单标识', 'targetClass' => PermissionMenu::class, 'targetAttribute' => 'code'],
+        ]);
+        // 业务处理
+        $res = $this->service->getAssignedApiPath($params);
+        // 渲染结果
+        return $this->success($res, '为菜单分配api后端接口');
+    }
+
+    /**
      * 为菜单分配api后端接口
      *
      * @return array
@@ -240,9 +259,8 @@ class MenuPathController extends RestController
     {
         // 参数验证和获取
         $params = $this->validateParams([
-            [['id', 'is_enable', 'api_codes'], 'required'],
-            ['is_enable', 'in', 'label' => '是否有效', 'range' => array_keys(TLabelEnable::enableLabels())],
-            ['id', 'exist', 'label' => '菜单ID', 'targetClass' => PermissionMenu::class, 'targetAttribute' => 'id'],
+            [['code', 'api_codes'], 'required'],
+            ['code', 'exist', 'label' => '菜单标识', 'targetClass' => PermissionMenu::class, 'targetAttribute' => 'code'],
             [
                 'api_codes',
                 'each',

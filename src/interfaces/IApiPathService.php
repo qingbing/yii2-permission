@@ -18,5 +18,11 @@ use YiiHelper\services\interfaces\ICurdService;
  */
 interface IApiPathService extends ICurdService
 {
-
+    /**
+     * 所有API接口，为菜单分配api提供
+     *
+     * @param array|null $params
+     * @return array
+     */
+    public function allForTransfer(array $params = []): array;
 }

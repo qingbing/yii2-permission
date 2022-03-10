@@ -117,4 +117,23 @@ class ApiPathService extends Service implements IApiPathService
         }
         return $model;
     }
+
+    /**
+     * 所有API接口，为菜单分配api提供
+     *
+     * @param array|null $params
+     * @return array
+     */
+    public function allForTransfer(array $params = []): array
+    {
+        return PermissionApi::find()
+            ->select([
+                'key'   => 'code',
+                'label' => 'CONCAT(path,": ", remark)',
+            ])
+            ->andWhere(['=', 'is_enable', IS_ENABLE_YES])
+            ->orderBy('path ASC, sort_order DESC')
+            ->asArray()
+            ->all();
+    }
 }

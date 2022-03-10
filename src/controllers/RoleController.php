@@ -141,6 +141,25 @@ class RoleController extends RestController
     }
 
     /**
+     * 获取角色已分配的menu-codes
+     *
+     * @return array
+     * @throws Exception
+     */
+    public function actionGetAssignedMenu()
+    {
+        // 参数验证和获取
+        $params = $this->validateParams([
+            [['code'], 'required'],
+            ['code', 'exist', 'label' => '菜单标识', 'targetClass' => PermissionRole::class, 'targetAttribute' => 'code'],
+        ]);
+        // 业务处理
+        $res = $this->service->getAssignedMenu($params);
+        // 渲染结果
+        return $this->success($res, '获取角色分配菜单成功');
+    }
+
+    /**
      * 为角色分配菜单
      *
      * @return array
@@ -150,9 +169,8 @@ class RoleController extends RestController
     {
         // 参数验证和获取
         $params = $this->validateParams([
-            [['id', 'is_enable', 'menu_codes'], 'required'],
-            ['is_enable', 'boolean', 'label' => '是否有效'],
-            ['id', 'exist', 'label' => '角色ID', 'targetClass' => PermissionRole::class, 'targetAttribute' => 'id'],
+            [['code', 'menu_codes'], 'required'],
+            ['code', 'exist', 'label' => '角色标志', 'targetClass' => PermissionRole::class, 'targetAttribute' => 'code'],
             [
                 'menu_codes',
                 'each',
@@ -165,10 +183,9 @@ class RoleController extends RestController
                 ]
             ]
         ], null, false, ['menu_codes'], ',');
-
         // 业务处理
         $res = $this->service->assignMenu($params);
         // 渲染结果
-        return $this->success($res, '为角色分配菜单');
+        return $this->success($res, '为角色分配菜单成功');
     }
 }
