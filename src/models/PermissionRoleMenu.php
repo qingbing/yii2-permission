@@ -60,4 +60,16 @@ class PermissionRoleMenu extends Model
             'updated_at'  => '更新时间',
         ];
     }
+
+    /**
+     * 关联 : 角色信息
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUser()
+    {
+        return $this->hasOne(PermissionRole::class, [
+            'code' => 'role_code',
+        ]);
+    }
 }
